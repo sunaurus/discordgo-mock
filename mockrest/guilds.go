@@ -42,6 +42,7 @@ func (roundTripper *RoundTripper) addHandlersGuilds(apiVersion string) {
 
 	putHandlers := subrouter.Methods(http.MethodPut).Subrouter()
 	putHandlers.HandleFunc(pathMembersUserIDRoleID, roundTripper.guildMemberRolesPUT)
+	putHandlers.HandleFunc(pathMembersUserID, roundTripper.guildMembersUserIDPUT)
 
 	patchHandlers := subrouter.Methods(http.MethodPatch).Subrouter()
 	patchHandlers.HandleFunc("", roundTripper.guildPATCH)
@@ -163,6 +164,28 @@ func (roundTripper *RoundTripper) guildMembersUserIDGET(w http.ResponseWriter, r
 	}
 
 	sendJSON(w, member)
+}
+
+func (roundTripper *RoundTripper) guildMembersUserIDPUT(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	guildID := vars[resourceGuildIDKey]
+	userID := vars[resourceUserIDKey]
+
+	member, err := roundTripper.state.Member(guildID, userID)
+	if err != nil {
+		sendError(w, fmt.Errorf("member not found: %w", err))
+
+		return
+	}
+
+	err = roundTripper.state.MemberAdd(member)
+	if err != nil {
+		sendError(w, fmt.Errorf("unable to add or update member: %w", err))
+
+		return
+	}
+
+	_, _ = w.Write([]byte{})
 }
 
 func (roundTripper *RoundTripper) guildChannelsGET(w http.ResponseWriter, r *http.Request) {

@@ -1,4 +1,4 @@
-module github.com/ewohltman/discordgo-mock
+module github.com/sunaurus/discordgo-mock
 
 go 1.22
 
